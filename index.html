@@ -1,13 +1,212 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Host Studio</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+
+    <style>
+        body { background-color: #111827; color: white; margin: 0; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="h-screen flex items-center justify-center text-xl font-bold text-blue-400 hidden">
+        कोड लोड हो रहा है...
+    </div>
+
+    <div id="dashboard" class="flex h-screen hidden">
+        <div class="w-64 bg-gray-950 border-r border-gray-800 p-6 flex flex-col justify-between">
+            <div>
+                <h1 class="text-xl font-bold text-blue-400 mb-8">HTML Host Studio</h1>
+                <nav class="space-y-2">
+                    <button onclick="switchTab('new')" id="tab-new" class="w-full text-left px-4 py-3 rounded-lg bg-blue-600 text-white">➕ नया कोड होस्ट करें</button>
+                    <button onclick="switchTab('history')" id="tab-history" class="w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-900">🕒 हिस्ट्री और लिस्ट</button>
+                </nav>
+            </div>
+            <div class="text-xs text-gray-600 text-center">Personal Use Only</div>
+        </div>
+
+        <div class="flex-1 p-8 overflow-y-auto">
+            
+            <div id="new-section" class="flex flex-col h-full space-y-4">
+                <h2 class="text-2xl font-semibold">नया HTML कोड डालें</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input type="text" id="codeName" placeholder="कोड का नाम (उदा: Quiz)" class="bg-gray-950 border border-gray-800 rounded-lg p-3 outline-none focus:border-blue-500">
+                    <div class="flex items-center bg-gray-950 border border-gray-800 rounded-lg px-3">
+                        <span class="text-gray-500 text-sm">/v/</span>
+                        <input type="text" id="customSlug" placeholder="custom-url" class="bg-transparent w-full py-3 outline-none ml-1">
+                    </div>
+                    <input type="password" id="securityPin" maxlength="3" placeholder="3-अंकों का सुरक्षा पिन" class="bg-gray-950 border border-gray-800 rounded-lg p-3 outline-none focus:border-blue-500">
+                </div>
+                
+                <div id="editor-container" class="flex-1 border border-gray-800 rounded-xl overflow-hidden min-h-[400px]"></div>
+                
+                <button onclick="deployCode()" class="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-medium transition">इसे इंटरनेट पर लाइव करें</button>
+            </div>
+
+            <div id="history-section" class="hidden space-y-6">
+                <h2 class="text-2xl font-semibold">होस्ट किए गए लिंक</h2>
+                <div class="bg-gray-950 border border-gray-800 rounded-xl overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-900 text-gray-400">
+                            <tr><th class="p-4">नाम</th><th class="p-4">लिंक</th><th class="p-4">व्यूज</th><th class="p-4">डिलीट</th></tr>
+                        </thead>
+                        <tbody id="historyTable" class="divide-y divide-gray-800">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 1. यहाँ अपनी Supabase की जानकारी डालें
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let editorInstance;
+
+        // 2. राउटिंग: चेक करें कि कोई लिंक खोल रहा है या डैशबोर्ड
+        window.onload = async () => {
+            const path = window.location.pathname;
+            
+            if (path.startsWith('/v/')) {
+                // लाइव लिंक रेंडरिंग मोड
+                document.getElementById('loadingScreen').classList.remove('hidden');
+                const slug = path.split('/v/')[1];
+                
+                const { data, error } = await supabase.from('deployments').select('*').eq('custom_slug', slug).single();
+                
+                if (error || !data) {
+                    document.body.innerHTML = "<h1 style='text-align:center; margin-top:20%; color:red; font-family:sans-serif;'>404 - यह लिंक मौजूद नहीं है</h1>";
+                    return;
+                }
+
+                // व्यूज बढ़ाएं
+                await supabase.from('deployments').update({ views_count: (data.views_count || 0) + 1 }).eq('id', data.id);
+                
+                // HTML कोड को सीधे ब्राउज़र में चलाएं
+                document.open();
+                document.write(data.html_content);
+                document.close();
+            } else {
+                // डैशबोर्ड मोड
+                document.getElementById('dashboard').classList.remove('hidden');
+                initEditor();
+            }
+        };
+
+        // 3. एडिटर सेटअप
+        function initEditor() {
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+            require(['vs/editor/editor.main'], function() {
+                editorInstance = monaco.editor.create(document.getElementById('editor-container'), {
+                    value: '\n<h1>नमस्कार!</h1>',
+                    language: 'html',
+                    theme: 'vs-dark',
+                    automaticLayout: true
+                });
+            });
+        }
+
+        // 4. टैब बदलने का लॉजिक
+        function switchTab(tab) {
+            document.getElementById('new-section').classList.add('hidden');
+            document.getElementById('history-section').classList.add('hidden');
+            
+            document.getElementById('tab-new').className = "w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-900";
+            document.getElementById('tab-history').className = "w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-900";
+            
+            if (tab === 'new') {
+                document.getElementById('new-section').classList.remove('hidden');
+                document.getElementById('tab-new').className = "w-full text-left px-4 py-3 rounded-lg bg-blue-600 text-white";
+            } else {
+                document.getElementById('history-section').classList.remove('hidden');
+                document.getElementById('tab-history').className = "w-full text-left px-4 py-3 rounded-lg bg-blue-600 text-white";
+                loadHistory();
+            }
+        }
+
+        // 5. नया कोड डिप्लॉय करना
+        async function deployCode() {
+            const name = document.getElementById('codeName').value;
+            const slug = document.getElementById('customSlug').value.toLowerCase().trim();
+            const pin = document.getElementById('securityPin').value;
+            const code = editorInstance.getValue();
+
+            if (!name || !slug || !pin || pin.length !== 3) {
+                alert("कृपया सभी जानकारी सही से भरें (पिन 3 अंकों का होना चाहिए)!");
+                return;
+            }
+
+            const { error } = await supabase.from('deployments').insert([{
+                code_name: name,
+                custom_slug: slug,
+                html_content: code,
+                security_pin: parseInt(pin),
+                views_count: 0
+            }]);
+
+            if (error) {
+                alert("त्रुटि: यह कस्टम लिंक पहले से किसी और ने ले रखा है। कोई दूसरा नाम चुनें।");
+            } else {
+                alert(`सफलता! आपका कोड लाइव है:\n${window.location.origin}/v/${slug}`);
+                document.getElementById('codeName').value = '';
+                document.getElementById('customSlug').value = '';
+                document.getElementById('securityPin').value = '';
+                switchTab('history');
+            }
+        }
+
+        // 6. हिस्ट्री लोड करना
+        async function loadHistory() {
+            const tbody = document.getElementById('historyTable');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center">लोड हो रहा है...</td></tr>';
+            
+            const { data, error } = await supabase.from('deployments').select('*').order('created_at', { ascending: false });
+            
+            if (data && data.length > 0) {
+                tbody.innerHTML = data.map(item => `
+                    <tr class="hover:bg-gray-900">
+                        <td class="p-4 font-medium text-gray-200">${item.code_name}</td>
+                        <td class="p-4 text-blue-400"><a href="/v/${item.custom_slug}" target="_blank">/v/${item.custom_slug}</a></td>
+                        <td class="p-4 text-green-400">${item.views_count || 0}</td>
+                        <td class="p-4">
+                            <button onclick="deleteCode('${item.id}')" class="text-red-500 hover:text-red-400 bg-red-900/30 px-3 py-1 rounded">हटाएं</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">कोई डेटा नहीं मिला।</td></tr>';
+            }
+        }
+
+        // 7. कोड डिलीट करना
+        async function deleteCode(id) {
+            const pin = prompt("इसे डिलीट करने के लिए अपना 3-अंकों का पिन दर्ज करें:");
+            if (!pin) return;
+
+            const { data } = await supabase.from('deployments').select('security_pin').eq('id', id).single();
+            
+            if (data && data.security_pin == pin) {
+                await supabase.from('deployments').delete().eq('id', id);
+                alert("सफलतापूर्वक डिलीट कर दिया गया!");
+                loadHistory();
+            } else {
+                alert("पिन गलत है!");
+            }
+        }
+    </script>
+</body>
 </html>
 
