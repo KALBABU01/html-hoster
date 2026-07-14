@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Host Studio</title>
+    <title>HTML Host Studio - प्रो संस्करण</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -12,56 +12,89 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
 
     <style>
-        body { background-color: #111827; color: white; margin: 0; }
+        body { background-color: #0f172a; color: #f8fafc; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .hidden { display: none !important; }
+        /* कस्टम स्क्रॉलबार */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <div id="loadingScreen" class="h-screen flex items-center justify-center text-xl font-bold text-blue-400 hidden">
-        कोड लोड हो रहा है...
+    <div id="loadingScreen" class="fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center hidden">
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <h2 class="text-xl font-semibold text-blue-400 tracking-wide">वेबपेज लोड हो रहा है...</h2>
     </div>
 
     <div id="dashboard" class="flex h-screen hidden">
-        <div class="w-64 bg-gray-950 border-r border-gray-800 p-6 flex flex-col justify-between">
+        <div class="w-72 bg-slate-950 border-r border-slate-800 p-6 flex flex-col justify-between shadow-2xl z-10">
             <div>
-                <h1 class="text-xl font-bold text-blue-400 mb-8">HTML Host Studio</h1>
-                <nav class="space-y-2">
-                    <button onclick="switchTab('new')" id="tab-new" class="w-full text-left px-4 py-3 rounded-lg bg-blue-600 text-white">➕ नया कोड होस्ट करें</button>
-                    <button onclick="switchTab('history')" id="tab-history" class="w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-900">🕒 हिस्ट्री और लिस्ट</button>
+                <h1 class="text-2xl font-extrabold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent mb-10 tracking-tight">
+                    HTML Host Studio
+                </h1>
+                <nav class="space-y-3">
+                    <button onclick="switchTab('new')" id="tab-new" class="w-full flex items-center px-5 py-3.5 rounded-xl bg-blue-600 text-white font-medium shadow-lg shadow-blue-900/20 transition-all duration-200 hover:bg-blue-500">
+                        <span class="mr-3 text-lg">✨</span> नया कोड होस्ट करें
+                    </button>
+                    <button onclick="switchTab('history')" id="tab-history" class="w-full flex items-center px-5 py-3.5 rounded-xl text-slate-400 font-medium transition-all duration-200 hover:bg-slate-800 hover:text-slate-200">
+                        <span class="mr-3 text-lg">📚</span> हिस्ट्री और प्रबंधन
+                    </button>
                 </nav>
             </div>
-            <div class="text-xs text-gray-600 text-center">Personal Use Only</div>
+            <div class="text-xs text-slate-500 text-center border-t border-slate-800 pt-5">
+                व्यक्तिगत सर्वर सुरक्षित रूप से जुड़ा है
+            </div>
         </div>
 
-        <div class="flex-1 p-8 overflow-y-auto">
+        <div class="flex-1 flex flex-col h-full bg-slate-900">
             
-            <div id="new-section" class="flex flex-col h-full space-y-4">
-                <h2 class="text-2xl font-semibold">नया HTML कोड डालें</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="text" id="codeName" placeholder="कोड का नाम (उदा: Quiz)" class="bg-gray-950 border border-gray-800 rounded-lg p-3 outline-none focus:border-blue-500">
-                    <div class="flex items-center bg-gray-950 border border-gray-800 rounded-lg px-3">
-                        <span class="text-gray-500 text-sm">/v/</span>
-                        <input type="text" id="customSlug" placeholder="custom-url" class="bg-transparent w-full py-3 outline-none ml-1">
-                    </div>
-                    <input type="password" id="securityPin" maxlength="3" placeholder="3-अंकों का सुरक्षा पिन" class="bg-gray-950 border border-gray-800 rounded-lg p-3 outline-none focus:border-blue-500">
+            <div id="new-section" class="flex flex-col h-full p-8 space-y-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">नया प्रोजेक्ट डिप्लॉय करें</h2>
+                    <p class="text-slate-400 mt-1 text-sm">अपना HTML कोड पेस्ट करें और इसे तुरंत इंटरनेट पर लाइव करें।</p>
                 </div>
                 
-                <div id="editor-container" class="flex-1 border border-gray-800 rounded-xl overflow-hidden min-h-[400px]"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/50">
+                    <input type="text" id="codeName" placeholder="प्रोजेक्ट का नाम (उदा: My Landing Page)" class="bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+                    
+                    <div class="flex items-center bg-slate-950 border border-slate-700 rounded-xl px-4 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+                        <span class="text-slate-500 font-medium">/v/</span>
+                        <input type="text" id="customSlug" placeholder="custom-url-slug" class="bg-transparent w-full py-3.5 text-sm text-white outline-none ml-2 placeholder-slate-500">
+                    </div>
+                    
+                    <input type="password" id="securityPin" maxlength="3" placeholder="3-अंकों का सुरक्षा पिन बनाएं" class="bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-center tracking-widest font-bold">
+                </div>
                 
-                <button onclick="deployCode()" class="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-medium transition">इसे इंटरनेट पर लाइव करें</button>
+                <div id="editor-container" class="flex-1 border border-slate-700 rounded-2xl overflow-hidden shadow-inner"></div>
+                
+                <button onclick="deployCode()" id="deployBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-emerald-900/20 transition-all transform active:scale-[0.99]">
+                    🚀 सर्वर पर लाइव करें
+                </button>
             </div>
 
-            <div id="history-section" class="hidden space-y-6">
-                <h2 class="text-2xl font-semibold">होस्ट किए गए लिंक</h2>
-                <div class="bg-gray-950 border border-gray-800 rounded-xl overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-900 text-gray-400">
-                            <tr><th class="p-4">नाम</th><th class="p-4">लिंक</th><th class="p-4">व्यूज</th><th class="p-4">डिलीट</th></tr>
-                        </thead>
-                        <tbody id="historyTable" class="divide-y divide-gray-800">
-                            </tbody>
-                    </table>
+            <div id="history-section" class="hidden flex flex-col h-full p-8 space-y-6">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">सक्रिय डिप्लॉयमेंट सूची</h2>
+                    <p class="text-slate-400 mt-1 text-sm">आपके द्वारा होस्ट किए गए सभी लाइव वेबपेज यहाँ मौजूद हैं।</p>
+                </div>
+                
+                <div class="flex-1 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+                    <div class="overflow-y-auto flex-1 p-0">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-900/80 backdrop-blur text-slate-400 sticky top-0 z-10 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-5 font-semibold">प्रोजेक्ट का नाम</th>
+                                    <th class="p-5 font-semibold">लाइव URL</th>
+                                    <th class="p-5 font-semibold">कुल व्यूज</th>
+                                    <th class="p-5 font-semibold text-center">सुरक्षा / नियंत्रण</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTable" class="divide-y divide-slate-800/50">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -69,144 +102,194 @@
     </div>
 
     <script>
-        // 1. यहाँ अपनी Supabase की जानकारी डालें
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        // 1. उपयोगकर्ता द्वारा प्रदान की गई Supabase जानकारी
+        const SUPABASE_URL = 'https://senngmncqifjtxvqkvcb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_lXbwAqBdFurJs5T2d2iDZw_A9JhftIP';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let editorInstance;
 
-        // 2. राउटिंग: चेक करें कि कोई लिंक खोल रहा है या डैशबोर्ड
+        // 2. राउटिंग: URL की जाँच करें
         window.onload = async () => {
             const path = window.location.pathname;
             
+            // यदि URL में /v/ है, तो डेटाबेस से HTML निकालकर सीधे रेंडर करें
             if (path.startsWith('/v/')) {
-                // लाइव लिंक रेंडरिंग मोड
                 document.getElementById('loadingScreen').classList.remove('hidden');
-                const slug = path.split('/v/')[1];
+                const slug = path.split('/v/')[1].replace(/\/$/, ""); // अंतिम स्लैश हटाएँ यदि हो
                 
-                const { data, error } = await supabase.from('deployments').select('*').eq('custom_slug', slug).single();
-                
-                if (error || !data) {
-                    document.body.innerHTML = "<h1 style='text-align:center; margin-top:20%; color:red; font-family:sans-serif;'>404 - यह लिंक मौजूद नहीं है</h1>";
-                    return;
-                }
+                try {
+                    const { data, error } = await supabase.from('deployments').select('*').eq('custom_slug', slug).single();
+                    
+                    if (error || !data) {
+                        document.body.innerHTML = `
+                            <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0f172a; color: white; font-family: sans-serif;">
+                                <h1 style="font-size: 5rem; font-weight: 900; color: #ef4444; margin: 0;">404</h1>
+                                <p style="font-size: 1.25rem; color: #94a3b8; margin-top: 1rem;">क्षमा करें, यह वेबपेज मौजूद नहीं है या हटा दिया गया है।</p>
+                            </div>`;
+                        return;
+                    }
 
-                // व्यूज बढ़ाएं
-                await supabase.from('deployments').update({ views_count: (data.views_count || 0) + 1 }).eq('id', data.id);
-                
-                // HTML कोड को सीधे ब्राउज़र में चलाएं
-                document.open();
-                document.write(data.html_content);
-                document.close();
+                    // पृष्ठभूमि में व्यूज की संख्या बढ़ाएँ
+                    supabase.from('deployments').update({ views_count: (data.views_count || 0) + 1 }).eq('id', data.id).then();
+                    
+                    // HTML कोड को सीधे ब्राउज़र में निष्पादित (Execute) करें
+                    document.open();
+                    document.write(data.html_content);
+                    document.close();
+                } catch (err) {
+                    console.error("रेंडरिंग त्रुटि:", err);
+                }
             } else {
-                // डैशबोर्ड मोड
+                // यदि /v/ नहीं है, तो होस्टिंग डैशबोर्ड दिखाएँ
                 document.getElementById('dashboard').classList.remove('hidden');
                 initEditor();
             }
         };
 
-        // 3. एडिटर सेटअप
+        // 3. Monaco Editor का प्रारंभिक सेटअप
         function initEditor() {
             require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
             require(['vs/editor/editor.main'], function() {
                 editorInstance = monaco.editor.create(document.getElementById('editor-container'), {
-                    value: '\n<h1>नमस्कार!</h1>',
+                    value: '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>My App</title>\n</head>\n<body>\n  \n  <h1>नमस्कार, दुनिया!</h1>\n  \n</body>\n</html>',
                     language: 'html',
                     theme: 'vs-dark',
-                    automaticLayout: true
+                    automaticLayout: true,
+                    minimap: { enabled: false },
+                    fontSize: 15,
+                    padding: { top: 20 }
                 });
             });
         }
 
-        // 4. टैब बदलने का लॉजिक
+        // 4. टैब बदलने की कार्यप्रणाली
         function switchTab(tab) {
             document.getElementById('new-section').classList.add('hidden');
             document.getElementById('history-section').classList.add('hidden');
             
-            document.getElementById('tab-new').className = "w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-900";
-            document.getElementById('tab-history').className = "w-full text-left px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-900";
+            const btnClassNormal = "w-full flex items-center px-5 py-3.5 rounded-xl text-slate-400 font-medium transition-all duration-200 hover:bg-slate-800 hover:text-slate-200";
+            const btnClassActive = "w-full flex items-center px-5 py-3.5 rounded-xl bg-blue-600 text-white font-medium shadow-lg shadow-blue-900/20 transition-all duration-200 hover:bg-blue-500";
+            
+            document.getElementById('tab-new').className = btnClassNormal;
+            document.getElementById('tab-history').className = btnClassNormal;
             
             if (tab === 'new') {
                 document.getElementById('new-section').classList.remove('hidden');
-                document.getElementById('tab-new').className = "w-full text-left px-4 py-3 rounded-lg bg-blue-600 text-white";
+                document.getElementById('tab-new').className = btnClassActive;
             } else {
                 document.getElementById('history-section').classList.remove('hidden');
-                document.getElementById('tab-history').className = "w-full text-left px-4 py-3 rounded-lg bg-blue-600 text-white";
+                document.getElementById('tab-history').className = btnClassActive;
                 loadHistory();
             }
         }
 
-        // 5. नया कोड डिप्लॉय करना
+        // 5. नए कोड को सर्वर पर डिप्लॉय करना
         async function deployCode() {
-            const name = document.getElementById('codeName').value;
-            const slug = document.getElementById('customSlug').value.toLowerCase().trim();
-            const pin = document.getElementById('securityPin').value;
+            const btn = document.getElementById('deployBtn');
+            const name = document.getElementById('codeName').value.trim();
+            const slug = document.getElementById('customSlug').value.toLowerCase().trim().replace(/[^a-z0-9-_]/g, '-');
+            const pin = document.getElementById('securityPin').value.trim();
             const code = editorInstance.getValue();
 
-            if (!name || !slug || !pin || pin.length !== 3) {
-                alert("कृपया सभी जानकारी सही से भरें (पिन 3 अंकों का होना चाहिए)!");
+            if (!name || !slug || !pin) {
+                alert("⚠️ कृपया प्रोजेक्ट का नाम, कस्टम URL और पिन आवश्यक रूप से भरें।");
+                return;
+            }
+            if (pin.length !== 3 || isNaN(pin)) {
+                alert("⚠️ सुरक्षा पिन केवल 3 अंकों की संख्या होनी चाहिए (जैसे: 123)।");
                 return;
             }
 
-            const { error } = await supabase.from('deployments').insert([{
-                code_name: name,
-                custom_slug: slug,
-                html_content: code,
-                security_pin: parseInt(pin),
-                views_count: 0
-            }]);
+            btn.innerText = "⏳ डिप्लॉय किया जा रहा है...";
+            btn.disabled = true;
+            btn.classList.add("opacity-75", "cursor-not-allowed");
 
-            if (error) {
-                alert("त्रुटि: यह कस्टम लिंक पहले से किसी और ने ले रखा है। कोई दूसरा नाम चुनें।");
-            } else {
-                alert(`सफलता! आपका कोड लाइव है:\n${window.location.origin}/v/${slug}`);
-                document.getElementById('codeName').value = '';
-                document.getElementById('customSlug').value = '';
-                document.getElementById('securityPin').value = '';
-                switchTab('history');
+            try {
+                const { error } = await supabase.from('deployments').insert([{
+                    code_name: name,
+                    custom_slug: slug,
+                    html_content: code,
+                    security_pin: parseInt(pin),
+                    views_count: 0
+                }]);
+
+                if (error) {
+                    if (error.code === '23505') {
+                        alert("❌ यह कस्टम URL पहले से मौजूद है। कृपया कोई दूसरा URL चुनें।");
+                    } else {
+                        alert("❌ डेटाबेस त्रुटि: " + error.message);
+                    }
+                } else {
+                    alert(`✅ शानदार! आपका कोड सफलतापूर्वक लाइव हो गया है।\nलिंक: ${window.location.origin}/v/${slug}`);
+                    document.getElementById('codeName').value = '';
+                    document.getElementById('customSlug').value = '';
+                    document.getElementById('securityPin').value = '';
+                    editorInstance.setValue('');
+                    switchTab('history');
+                }
+            } catch (err) {
+                alert("❌ नेटवर्क त्रुटि। कृपया पुनः प्रयास करें।");
+            } finally {
+                btn.innerText = "🚀 सर्वर पर लाइव करें";
+                btn.disabled = false;
+                btn.classList.remove("opacity-75", "cursor-not-allowed");
             }
         }
 
-        // 6. हिस्ट्री लोड करना
+        // 6. डेटाबेस से इतिहास (History) लाना
         async function loadHistory() {
             const tbody = document.getElementById('historyTable');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center">लोड हो रहा है...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400">डेटा प्राप्त किया जा रहा है...</td></tr>';
             
-            const { data, error } = await supabase.from('deployments').select('*').order('created_at', { ascending: false });
-            
-            if (data && data.length > 0) {
-                tbody.innerHTML = data.map(item => `
-                    <tr class="hover:bg-gray-900">
-                        <td class="p-4 font-medium text-gray-200">${item.code_name}</td>
-                        <td class="p-4 text-blue-400"><a href="/v/${item.custom_slug}" target="_blank">/v/${item.custom_slug}</a></td>
-                        <td class="p-4 text-green-400">${item.views_count || 0}</td>
-                        <td class="p-4">
-                            <button onclick="deleteCode('${item.id}')" class="text-red-500 hover:text-red-400 bg-red-900/30 px-3 py-1 rounded">हटाएं</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } else {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-500">कोई डेटा नहीं मिला।</td></tr>';
+            try {
+                const { data, error } = await supabase.from('deployments').select('*').order('created_at', { ascending: false });
+                
+                if (data && data.length > 0) {
+                    tbody.innerHTML = data.map(item => `
+                        <tr class="hover:bg-slate-800/40 transition-colors group">
+                            <td class="p-5 font-medium text-slate-200">${item.code_name}</td>
+                            <td class="p-5">
+                                <a href="/v/${item.custom_slug}" target="_blank" class="text-blue-400 hover:text-blue-300 hover:underline flex items-center">
+                                    /v/${item.custom_slug}
+                                    <svg class="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            </td>
+                            <td class="p-5 text-emerald-400 font-medium">👁️ ${item.views_count || 0}</td>
+                            <td class="p-5 text-center">
+                                <button onclick="deleteCode('${item.id}', '${item.code_name}')" class="text-red-400 hover:text-white bg-red-500/10 hover:bg-red-500 border border-red-500/20 px-4 py-1.5 rounded-lg transition-all text-sm font-medium">
+                                    हटाएं
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">अभी तक कोई कोड होस्ट नहीं किया गया है।</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-red-400">डेटा लोड करने में त्रुटि आई।</td></tr>';
             }
         }
 
-        // 7. कोड डिलीट करना
-        async function deleteCode(id) {
-            const pin = prompt("इसे डिलीट करने के लिए अपना 3-अंकों का पिन दर्ज करें:");
+        // 7. सुरक्षा पिन के माध्यम से कोड को हटाना
+        async function deleteCode(id, name) {
+            const pin = prompt(`'${name}' को हमेशा के लिए हटाने हेतु अपना 3-अंकों का सुरक्षा पिन दर्ज करें:`);
             if (!pin) return;
 
-            const { data } = await supabase.from('deployments').select('security_pin').eq('id', id).single();
-            
-            if (data && data.security_pin == pin) {
-                await supabase.from('deployments').delete().eq('id', id);
-                alert("सफलतापूर्वक डिलीट कर दिया गया!");
-                loadHistory();
-            } else {
-                alert("पिन गलत है!");
+            try {
+                const { data, error } = await supabase.from('deployments').select('security_pin').eq('id', id).single();
+                
+                if (data && data.security_pin == pin) {
+                    await supabase.from('deployments').delete().eq('id', id);
+                    alert("✅ पृष्ठ सफलतापूर्वक हटा दिया गया!");
+                    loadHistory();
+                } else {
+                    alert("❌ क्षमा करें, आपका सुरक्षा पिन गलत है!");
+                }
+            } catch (err) {
+                alert("❌ प्रक्रिया में त्रुटि आई।");
             }
         }
     </script>
 </body>
 </html>
-
